@@ -5,10 +5,11 @@ package provider
 
 import (
 	"context"
-	"net/http"
 	"os"
 	"time"
 
+	apiclient "github.com/cdsre/terraform-provider-capellaextras/api/client"
+	"github.com/cdsre/terraform-provider-capellaextras/internal/actions"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
@@ -139,39 +140,34 @@ func (p *CapellaProvider) Configure(ctx context.Context, req provider.ConfigureR
 	// if data.Endpoint.IsNull() { /* ... */ }
 
 	// Example client configuration for data sources and resources
-	client := http.DefaultClient
+	client := apiclient.NewClient(
+		apiclient.WithBaseURL(config.Host.ValueString()),
+		apiclient.WithAuthenticator(apiclient.BearerTokenAuth{Token: config.AuthenticationToken.ValueString()}),
+	)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 	resp.ActionData = client
 }
 
 func (p *CapellaProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewExampleResource,
-	}
+	return []func() resource.Resource{}
 }
 
 func (p *CapellaProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
-	return []func() ephemeral.EphemeralResource{
-		NewExampleEphemeralResource,
-	}
+	return []func() ephemeral.EphemeralResource{}
 }
 
 func (p *CapellaProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewExampleDataSource,
-	}
+	return []func() datasource.DataSource{}
 }
 
 func (p *CapellaProvider) Functions(ctx context.Context) []func() function.Function {
-	return []func() function.Function{
-		NewExampleFunction,
-	}
+	return []func() function.Function{}
 }
 
 func (p *CapellaProvider) Actions(ctx context.Context) []func() action.Action {
 	return []func() action.Action{
-		NewExampleAction,
+		actions.NewBuildIndexAction,
 	}
 }
 

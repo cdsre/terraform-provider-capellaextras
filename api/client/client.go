@@ -1,4 +1,4 @@
-package api
+package client
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ import (
 
 // DefaultBaseURL is the default Capella API endpoint for v4.
 // Example: https://api.cloud.couchbase.com
-const DefaultBaseURL = "https://api.cloud.couchbase.com"
+const DefaultBaseURL = "https://cloudapi.cloud.couchbase.com"
 
 // Authenticator applies authentication to an outgoing HTTP request.
 // This allows supporting different Capella auth mechanisms (Bearer tokens or API keys).
