@@ -1,0 +1,22 @@
+# {{ .Name }} 
+{{ .Description }}
+
+## Action Per Index
+This is not the most efficient way to do this since the keyspace will need to be scanned each time an index is built in 
+the same collection. However it its the easiest to implement. In cases where your adding multiple indexes to a new bucket
+with no data this will still be fast. Or if you are adding an additional index to an existing bucket it should still be ok.
+
+{{ tffile "examples/actions/capellaextras_build_index/action_per_index.tf" }}
+
+## Building Multiple Indexes
+A more efficent method would be to create all of the indexes for a collection then build them at the same time. This will 
+mean the key space only needs to be scanned once for all indexes. However this can be challanging due to how the capella
+provider implements deferred builds. 
+
+So do to this we can collect all indexes into a `terraform_data` resource that will trigger every apply. This is not an 
+issue since any indexes that are already built will be skipped so triggering this on every apply will still be efficient.
+
+{{ tffile "examples/actions/capellaextras_build_index/multi_index_build.tf" }}
+ 
+
+{{ .SchemaMarkdown }}
