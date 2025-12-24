@@ -102,11 +102,6 @@ func (bi *BuildIndexAction) Configure(ctx context.Context, req action.ConfigureR
 }
 
 func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest, resp *action.InvokeResponse) {
-	// Send a progress message back to Terraform
-	resp.SendProgress(action.InvokeProgressEvent{
-		Message: "starting action invocation",
-	})
-
 	var data BuildIndexActionModel
 
 	// Read Terraform configuration data into the model
@@ -127,8 +122,9 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 	} else {
 		collection = data.CollectionName.ValueString()
 	}
+
 	var indexNames []string
-	diags := data.IndexNames.ElementsAs(ctx, indexNames, false)
+	diags := data.IndexNames.ElementsAs(ctx, &indexNames, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -162,6 +158,19 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 		}
 	}
 
+	if len(buildIndexes) == 0 {
+		// Send a progress message back to Terraform
+		resp.SendProgress(action.InvokeProgressEvent{
+			Message: fmt.Sprintf("No indexes need built"),
+		})
+		return
+	}
+
+	// Send a progress message back to Terraform
+	resp.SendProgress(action.InvokeProgressEvent{
+		Message: fmt.Sprintf("The following indexes need built: %v", buildIndexes),
+	})
+
 	_, err := indexes.BuildDeferredIndexes(ctx, bi.Client, &indexes.IndexBuildRequest{
 		OrganizationId: data.OrganizationId.ValueString(),
 		ProjectId:      data.ProjectId.ValueString(),
@@ -176,6 +185,7 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 			"Build Deferred Indexes Failed",
 			fmt.Sprintf("Cannot build deferred indexes.  Error: %v\n", err.Error()),
 		)
+		return
 	}
 
 	// Send a progress message back to Terraform
