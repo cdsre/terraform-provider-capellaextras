@@ -23,22 +23,27 @@ resource "couchbase-capella_query_indexes" "index" {
   with = {
     defer_build = true
   }
+}
+
+resource "terraform_data" "foo" {
+  triggers_replace = {
+    timestamp = timestamp()
+  }
   lifecycle {
     action_trigger {
       events  = [after_create]
-      actions = [action.capellaextras_build_index.build_index[each.key]]
+      actions = [action.capellaextras_build_index.build_index]
     }
   }
+  depends_on = [couchbase-capella_query_indexes.index]
 }
 
-
 action "capellaextras_build_index" "build_index" {
-  for_each = couchbase-capella_query_indexes.index
   config {
-    bucket_name     = each.value.bucket_name
-    cluster_id      = each.value.cluster_id
-    organization_id = each.value.organization_id
-    project_id      = each.value.project_id
-    index_names     = [each.key]
+    bucket_name     = couchbase-capella_bucket.new_free_tier_bucket.name
+    cluster_id      = couchbase-capella_free_tier_cluster.new_free_tier_cluster.id
+    organization_id = local.org_id
+    project_id      = couchbase-capella_project.new_project.id
+    index_names     = [for idx in couchbase-capella_query_indexes.index : idx.index_name]
   }
 }

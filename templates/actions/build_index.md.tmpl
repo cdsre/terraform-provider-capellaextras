@@ -1,5 +1,15 @@
 # {{ .Name }} 
-{{ .Description }}
+
+Couchbase when creating an index will immediatly start building the index. This means scanning the entire keyspace and 
+updating the index as it goes. If you have a large amount of data this can take some time. If you are also planning on 
+building other indexes in the collection then this will result in multiple scans.
+
+To work around the issue couchbase allows you to create an index but defer its build. This is really usefaul when building 
+multiple indexes in the same collection. Since it can scan the keyspace once and update each index in parallel. 
+
+While the existing couchbase-capella provider gives a way to do deferred index builds if the index was deleted terraform
+would only recreate the index but it would never be built again. This action is designed to allow builds to be triggered
+any time an index is created.
 
 ## Action Per Index
 This is not the most efficient way to do this since the keyspace will need to be scanned each time an index is built in 
