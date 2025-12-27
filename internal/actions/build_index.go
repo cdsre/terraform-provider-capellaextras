@@ -162,7 +162,7 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 	if len(buildIndexes) == 0 {
 		// Send a progress message back to Terraform
 		resp.SendProgress(action.InvokeProgressEvent{
-			Message: fmt.Sprintf("No indexes need built"),
+			Message: "No indexes need built",
 		})
 		return
 	}

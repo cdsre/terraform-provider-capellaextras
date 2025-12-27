@@ -9,7 +9,7 @@ import (
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
-// Test that BearerTokenAuth sets the Authorization header when a token is provided
+// Test that BearerTokenAuth sets the Authorization header when a token is provided.
 func TestBearerTokenAuth_Apply_SetsHeader(t *testing.T) {
 	auth := BearerTokenAuth{Token: "abc123"}
 	r := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
@@ -21,7 +21,7 @@ func TestBearerTokenAuth_Apply_SetsHeader(t *testing.T) {
 	}
 }
 
-// Test that BearerTokenAuth.Apply is a no-op when token is empty
+// Test that BearerTokenAuth.Apply is a no-op when token is empty.
 func TestBearerTokenAuth_Apply_EmptyToken_NoHeader(t *testing.T) {
 	auth := BearerTokenAuth{Token: ""}
 	r := httptest.NewRequest(http.MethodGet, "http://example.com", nil)
@@ -33,7 +33,7 @@ func TestBearerTokenAuth_Apply_EmptyToken_NoHeader(t *testing.T) {
 	}
 }
 
-// Test the integration via Client.Do that the Authorization header is sent to the server
+// Test the integration via Client.Do that the Authorization header is sent to the server.
 func TestClient_Do_BearerAuthHeaderSent(t *testing.T) {
 	// Setup a test server that asserts the header and returns JSON
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func TestClient_Do_BearerAuthHeaderSent(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	// Build client with base URL pointing at the test server and a bearer token
+	// Build client with base URL pointing at the test server and a bearer token.
 	rhc := retryablehttp.NewClient()
 	rhc.RetryMax = 0 // deterministic tests
 	c := NewClient(
@@ -73,7 +73,7 @@ func TestClient_Do_BearerAuthHeaderSent(t *testing.T) {
 	}
 }
 
-// Negative test: wrong or missing token results in non-2xx and proper error handling path
+// Negative test: wrong or missing token results in non-2xx and proper error handling path.
 func TestClient_Do_BearerAuthHeaderMissing(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") == "" {
@@ -92,7 +92,7 @@ func TestClient_Do_BearerAuthHeaderMissing(t *testing.T) {
 	c := NewClient(
 		WithBaseURL(ts.URL),
 		WithHTTPClient(rhc),
-		// Note: no authenticator -> header will be missing
+		// Note: no authenticator -> header will be missing.
 	)
 
 	var out any

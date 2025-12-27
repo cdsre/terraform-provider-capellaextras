@@ -234,8 +234,8 @@ func (c *Client) Do(ctx context.Context, method, p string, query map[string]stri
 	defer func() {
 		// drain body on caller decode error responsibility; otherwise we close here when out is nil
 		if out == nil {
-			io.Copy(io.Discard, resp.Body)
-			resp.Body.Close()
+			_, err = io.Copy(io.Discard, resp.Body)
+			err = resp.Body.Close()
 		}
 	}()
 
@@ -265,7 +265,7 @@ func (c *Client) Do(ctx context.Context, method, p string, query map[string]stri
 	return resp, nil
 }
 
-// Convenience helpers
+// Convenience helpers.
 func (c *Client) Get(ctx context.Context, p string, query map[string]string, out any) (*http.Response, error) {
 	return c.Do(ctx, http.MethodGet, p, query, nil, out)
 }
