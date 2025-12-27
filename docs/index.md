@@ -13,7 +13,7 @@ description: |-
 
 ```terraform
 provider "capellaextras" {
-  
+
 }
 ```
 

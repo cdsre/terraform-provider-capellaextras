@@ -2,11 +2,11 @@ locals {
   org_id = "aaaaaaaa-8f0c-22222-865e-bbbbbbbbbbbb"
   indexes = {
     idx1 = {
-      org_id = local.org_id
+      org_id     = local.org_id
       index_keys = ["foo", "bar"]
     }
     idx2 = {
-      org_id = local.org_id
+      org_id     = local.org_id
       index_keys = ["foo", "bar"]
     }
   }
