@@ -21,11 +21,11 @@ locals {
   org_id = "aaaaaaaa-8f0c-22222-865e-bbbbbbbbbbbb"
   indexes = {
     idx1 = {
-      org_id = local.org_id
+      org_id     = local.org_id
       index_keys = ["foo", "bar"]
     }
     idx2 = {
-      org_id = local.org_id
+      org_id     = local.org_id
       index_keys = ["foo", "bar"]
     }
   }
@@ -58,6 +58,8 @@ action "capellaextras_build_index" "build_index" {
     cluster_id      = each.value.cluster_id
     organization_id = each.value.organization_id
     project_id      = each.value.project_id
+    scope_name      = each.value.scope_name
+    collection_name = each.value.collection_name
     index_names     = [each.key]
   }
 }
