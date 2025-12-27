@@ -146,6 +146,7 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 				"Get Index Build Status Failed",
 				fmt.Sprintf("Cannot get index build status for index %s.  Error: %v\n", indexName, err.Error()),
 			)
+			return
 		}
 
 		// Send a progress message back to Terraform
