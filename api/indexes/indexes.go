@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	apiclient "github.com/cdsre/terraform-provider-capellaextras/api/client"
 )
@@ -75,4 +76,21 @@ func BuildDeferredIndexes(ctx context.Context, c *apiclient.Client, req *IndexBu
 	)
 	_, err := c.Post(ctx, path, def, &res)
 	return res, err
+}
+
+func WaitForScheduledIndexCreation(ctx context.Context, c *apiclient.Client, req *IndexBuildStatusRequest) (*IndexBuildStatusResponse, error) {
+	retries := 600
+	delay := 10
+	for i := 0; i < retries; i++ {
+		res, err := GetIndexBuildStatus(ctx, c, req)
+		if err != nil {
+			return res, err
+		}
+
+		if res.Status == "Created" {
+			return res, err
+		}
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
+	return nil, fmt.Errorf("scheduled Index was not created after %d seconds", retries*delay)
 }

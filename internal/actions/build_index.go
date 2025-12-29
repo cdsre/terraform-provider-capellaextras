@@ -132,7 +132,7 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 
 	var buildIndexes []string
 	for _, indexName := range indexNames {
-		res, err := indexes.GetIndexBuildStatus(ctx, bi.Client, &indexes.IndexBuildStatusRequest{
+		ibReq := indexes.IndexBuildStatusRequest{
 			OrganizationId: data.OrganizationId.ValueString(),
 			ProjectId:      data.ProjectId.ValueString(),
 			ClusterId:      data.ClusterId.ValueString(),
@@ -140,7 +140,8 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 			IndexName:      indexName,
 			Scope:          scope,
 			Collection:     collection,
-		})
+		}
+		res, err := indexes.GetIndexBuildStatus(ctx, bi.Client, &ibReq)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Get Index Build Status Failed",
@@ -153,6 +154,17 @@ func (bi *BuildIndexAction) Invoke(ctx context.Context, req action.InvokeRequest
 		resp.SendProgress(action.InvokeProgressEvent{
 			Message: fmt.Sprintf("Index: %s, Status: %s", indexName, res.Status),
 		})
+
+		if res.Status == "Scheduled for Creation" {
+			res, err = indexes.WaitForScheduledIndexCreation(ctx, bi.Client, &ibReq)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Wait for Scheduled Index Creation Failed",
+					fmt.Sprintf("Cannot wait for scheduled index creation for index %s.  Error: %v\n", indexName, err.Error()),
+				)
+				return
+			}
+		}
 
 		if res.Status == "Created" {
 			buildIndexes = append(buildIndexes, indexName)
