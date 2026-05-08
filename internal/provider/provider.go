@@ -10,6 +10,7 @@ import (
 
 	apiclient "github.com/cdsre/terraform-provider-capellaextras/api/client"
 	"github.com/cdsre/terraform-provider-capellaextras/internal/actions"
+	"github.com/cdsre/terraform-provider-capellaextras/internal/resources"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
@@ -150,7 +151,9 @@ func (p *CapellaProvider) Configure(ctx context.Context, req provider.ConfigureR
 }
 
 func (p *CapellaProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		resources.NewDeferredIndexBuildResource,
+	}
 }
 
 func (p *CapellaProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {

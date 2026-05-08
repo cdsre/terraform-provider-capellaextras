@@ -1,0 +1,45 @@
+# {{ .Name }}
+
+Manages deferred index builds for Couchbase Capella query indexes.
+
+When Couchbase creates an index it immediately begins building it, which requires scanning the entire
+keyspace. If you are creating several indexes on the same collection you can instead create them all
+with `defer_build = true` and then trigger a single build pass. This resource manages that build
+step and tracks the current build status of each index.
+
+Unlike the `capellaextras_build_index` action — which must be triggered explicitly — this resource
+participates in `terraform plan`. When the stored index statuses include any value that matches
+`build_trigger_statuses` (default: `["Created"]`), Terraform will detect the drift and prompt
+for an apply.
+
+## Behaviour
+
+- **Create / Update**: Checks the current status of every index in `index_names`. Any index whose
+  status matches an entry in `build_trigger_statuses` is included in a single `BUILD INDEX`
+  statement. Indexes that are already building or online are left untouched.
+- **Read (plan refresh)**: Fetches live statuses from the API so that drift — e.g. an index that
+  was deleted and recreated as deferred outside Terraform — is surfaced on the next plan.
+- **Delete**: No-op. This resource does not own the underlying indexes; destroy only removes
+  the resource from Terraform state.
+- **Fire-and-forget**: The build runs in the background; Terraform does not wait for indexes
+  to reach `Online`. The state records `"Building"` immediately after the build is triggered
+  and will be corrected to the real status on the next plan refresh.
+
+## Extending trigger statuses
+
+By default only indexes in `"Created"` status are built. You can extend this via
+`build_trigger_statuses` to handle additional states, for example to rebuild indexes that have
+entered an error state:
+
+```hcl
+resource "capellaextras_deferred_index_build" "indexes" {
+  # ...
+  build_trigger_statuses = ["Created", "Error"]
+}
+```
+
+## Example Usage
+
+{{ tffile "examples/resources/capellaextras_deferred_index_build/resource.tf" }}
+
+{{ .SchemaMarkdown }}
